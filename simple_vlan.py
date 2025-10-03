@@ -16,7 +16,7 @@ class SimpleVLANTopo(Topo):
         h2 = self.addHost('h2', mac='00:00:00:00:00:02') # guest
         h3 = self.addHost('h3', mac='00:00:00:00:00:03') # management
 
-        #switch koppelnen
+        #switch koppellen
         self.addLink(h1, s1, port2=1) # employee
         self.addLink(h2, s1, port2=2) # guest
         self.addLink(h3, s1, port2=3) # management
@@ -32,3 +32,8 @@ def run():
 if __name__ == '__main__':
     setLogLevel('info')
     run()
+
+
+
+#runt nu in python 3, kunnen errors van komen bij latere fase. zorg ervoor dat je het kan aanroepen met mininet zelf.
+#als je het nu runt zit het in python 3 omgeving en niet in mininet omgeving.
