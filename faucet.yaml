@@ -15,12 +15,31 @@ dps:
     hardware: "Open vSwitch"
     interfaces:
       1:
-        name: "employee_port"
-        native_vlan: employees
+       { name: "A-employees_port",
+        native_vlan: employees}
       2:
-        name: "guest_port"
-        native_vlan: Guests 
+       { name: "A-guests_port",
+        native_vlan: Guests}
       3:
-        name: "management_port"
-        native_vlan: Management
-    
+        {name: "A-management_port",
+        native_vlan: Management}
+      10:
+        {name: "trunk_to_s2",
+        tagged_vlans: [employees, Guests, Management]}
+  
+  s2:
+    dp_id: 0x2
+    hardware: "Open vSwitch"
+    interfaces:
+      1:
+       { name: "B-employees_port",
+        native_vlan: employees}
+      2:
+       { name: "B-guests_port",
+        native_vlan: Guests}
+      3:
+        {name: "B-management_port",
+        native_vlan: Management}
+      10:
+        {name: "trunk_to_s1",
+        tagged_vlans: [employees, Guests, Management]}
