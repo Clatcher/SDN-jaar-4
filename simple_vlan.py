@@ -32,6 +32,7 @@ class SimpleVLANTopo(Topo):
 
         # darkfiber trunk tussen centrale patchkasten (s1<->s2)
         # Gebruik poort 10 aan beide kanten voor de
+        self.addLink(s1, s2, port1=10, port2=10)  # trunk link
 
 def run():
     topo = SimpleVLANTopo()
@@ -49,4 +50,3 @@ if __name__ == '__main__':
 topos = {
     'simple_vlan': SimpleVLANTopo
 }
-
