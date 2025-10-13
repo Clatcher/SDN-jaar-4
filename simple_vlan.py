@@ -31,6 +31,22 @@ class SimpleVLANTopo(Topo):
         self.addLink(h6, s2, port2=3)  # B management
 
         # darkfiber trunk tussen centrale patchkasten (s1<->s2)
-        # Gebruik poort 10 aan beide kanten voor de trunk
-        self.addLink(s1, s2, port1=10, port2=10)
-        # VLAN tagging wordt afgehandeld door de controller (OVS switch)
+        # Gebruik poort 10 aan beide kanten voor de
+
+def run():
+    topo = SimpleVLANTopo()
+    net = Mininet(topo=topo, controller=RemoteController)
+    net.start()
+    print("Network is up and running.")
+    CLI(net)
+
+    net.stop()
+
+if __name__ == '__main__':
+    setLogLevel('info')
+    run()
+
+topos = {
+    'simple_vlan': SimpleVLANTopo
+}
+
