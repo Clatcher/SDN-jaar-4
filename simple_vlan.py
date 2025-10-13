@@ -27,13 +27,14 @@ def run():
     net.start()
     print("Network is up and running.")
     CLI(net)
+
     net.stop()
 
 if __name__ == '__main__':
     setLogLevel('info')
     run()
 
+topos = {
+    'simple_vlan': SimpleVLANTopo
+}
 
-
-#runt nu in python 3, kunnen errors van komen bij latere fase. zorg ervoor dat je het kan aanroepen met mininet zelf.
-#als je het nu runt zit het in python 3 omgeving en niet in mininet omgeving.
