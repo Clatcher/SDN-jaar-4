@@ -1,0 +1,27 @@
+version: 2
+vlans:
+  employees:
+    id: 10
+    description: Employees VLAN
+  Guests:
+    id: 20
+    description: Guests VLAN
+  Management:
+    id: 30
+    description: Management VLAN
+
+dps:
+  s1:
+    dp_id: 0x1
+    hardware: "Open vSwitch"
+    interfaces:
+      1:
+        name: "employee_port"
+        native_vlan: "employees"
+      2:
+        name: "guest_port"
+        native_vlan: "Guests" 
+      3:
+        name: "management_port"
+        native_vlan: "Management"
+    
