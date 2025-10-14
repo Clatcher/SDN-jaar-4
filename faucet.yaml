@@ -3,21 +3,29 @@ vlans:
     vid: 10
     description: "Employees VLAN"
     faucet_vips: ["10.0.10.1/24"]
+    routes:
+      - route:
+          ip_dst: "0.0.0.0/0"
+          ip_gw: "203.0.113.1"
   guests:
     vid: 20
     description: "Guests VLAN"
     faucet_vips: ["10.0.20.1/24"]
+    routes:
+      - route:
+          ip_dst: "0.0.0.0/0"
+          ip_gw: "203.0.113.1"
   management:
     vid: 30
     description: "Management VLAN"
     faucet_vips: ["10.0.30.1/24"]
-  isp_a:
+    routes:
+      - route:
+          ip_dst: "0.0.0.0/0"
+          ip_gw: "203.0.113.1"
+  isp:
     vid: 99
-    description: "ISP A VLAN"
-
-  isp_b:
-    vid: 98
-    description: "ISP B VLAN"
+    description: "ISP VLAN"
   
 
 dps:
@@ -36,10 +44,10 @@ dps:
         native_vlan: management
       10:
         name: "trunk_to_s2"
-        tagged_vlans: [employees, guests, management, isp_a, isp_b]
+        tagged_vlans: [employees, guests, management, isp]
       20:
         name: "A-ISP_port"
-        native_vlan: isp_a
+        native_vlan: isp
 
   s2:
     dp_id: 0x2
@@ -56,7 +64,7 @@ dps:
         native_vlan: management
       10:
         name: "trunk_to_s1"
-        tagged_vlans: [employees, guests, management, isp_a, isp_b]
+        tagged_vlans: [employees, guests, management, isp]
       20:
-        name: "B-ISP_port"
-        native_vlan: isp_b
+        name: "isp_b_port"
+        native_vlan: isp
