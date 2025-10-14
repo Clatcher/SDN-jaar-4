@@ -15,20 +15,26 @@ class SimpleVLANTopo(Topo):
         h1 = self.addHost('h1', mac='00:00:00:00:00:01')  # employee A
         h2 = self.addHost('h2', mac='00:00:00:00:00:02')  # guest A
         h3 = self.addHost('h3', mac='00:00:00:00:00:03')  # management A
-
+        h7 = self.addHost('h7', mac='00:00:00:00:00:04')  # ISP A
+       
         # hosts in Gebouw B (1 per VLAN)
         h4 = self.addHost('h4', mac='00:00:00:00:00:11')  # employee B
         h5 = self.addHost('h5', mac='00:00:00:00:00:12')  # guest B
         h6 = self.addHost('h6', mac='00:00:00:00:00:13')  # management B
-
-        # access links (untagged aan hostzijde)
+        h8 = self.addHost('h8', mac='00:00:00:00:00:14')  # ISP B
+        
+        
+        # access links Gebouw A
         self.addLink(h1, s1, port2=1)  # A employee
         self.addLink(h2, s1, port2=2)  # A guest
         self.addLink(h3, s1, port2=3)  # A management
-
+        self.addLink(h7, s1, port2=20)  # A ISP
+        
+        # access links Gebouw B
         self.addLink(h4, s2, port2=1)  # B employee
         self.addLink(h5, s2, port2=2)  # B guest
         self.addLink(h6, s2, port2=3)  # B management
+        self.addLink(h8, s2, port2=20)  # B ISP
 
         # darkfiber trunk tussen centrale patchkasten (s1<->s2)
         # Gebruik poort 10 aan beide kanten voor de
