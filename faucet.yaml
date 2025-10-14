@@ -36,7 +36,7 @@ dps:
         native_vlan: management
       10:
         name: "trunk_to_s2"
-        tagged_vlans: [employees, guests, management]
+        tagged_vlans: [employees, guests, management, isp_a, isp_b]
       20:
         name: "A-ISP_port"
         native_vlan: isp_a
@@ -56,7 +56,7 @@ dps:
         native_vlan: management
       10:
         name: "trunk_to_s1"
-        tagged_vlans: [employees, guests, management]
+        tagged_vlans: [employees, guests, management, isp_a, isp_b]
       20:
         name: "B-ISP_port"
         native_vlan: isp_b
