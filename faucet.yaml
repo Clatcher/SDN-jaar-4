@@ -1,3 +1,5 @@
+version: 2
+
 vlans:
   employees:
     vid: 10
@@ -7,6 +9,7 @@ vlans:
       - route:
           ip_dst: "0.0.0.0/0"
           ip_gw: "203.0.113.1"
+
   guests:
     vid: 20
     description: "Guests VLAN"
@@ -15,6 +18,7 @@ vlans:
       - route:
           ip_dst: "0.0.0.0/0"
           ip_gw: "203.0.113.1"
+
   management:
     vid: 30
     description: "Management VLAN"
@@ -23,10 +27,11 @@ vlans:
       - route:
           ip_dst: "0.0.0.0/0"
           ip_gw: "203.0.113.1"
+
   isp:
     vid: 99
     description: "ISP VLAN"
-  
+    faucet_vips: ["203.0.113.14/28", "203.0.113.1/28"]
 
 dps:
   s1:
@@ -66,5 +71,5 @@ dps:
         name: "trunk_to_s1"
         tagged_vlans: [employees, guests, management, isp]
       20:
-        name: "isp_b_port"
+        name: "B-ISP_port"
         native_vlan: isp
