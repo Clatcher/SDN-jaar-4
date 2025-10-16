@@ -1,5 +1,19 @@
 version: 2
 
+acls:
+  mgmt_port_security:
+    - rule:
+        description: "Allow only known management MAC"
+        dl_src: "00:00:00:00:00:03"
+        actions:
+          allow: 1
+    - rule:
+        description: "Drop unknown MACs"
+        actions:
+          allow: 0
+
+
+
 vlans:
   employees:
     vid: 10
@@ -23,6 +37,7 @@ vlans:
     vid: 30
     description: "Management VLAN"
     faucet_vips: ["10.0.30.1/24"]
+    acl_in: mgmt_port_security
     routes:
       - route:
           ip_dst: "0.0.0.0/0"
@@ -31,7 +46,7 @@ vlans:
   isp:
     vid: 99
     description: "ISP VLAN"
-    faucet_vips: ["203.0.113.14/28", "203.0.113.1/28"]
+    faucet_vips: ["203.0.113.14/28"]
 
 dps:
   s1:
