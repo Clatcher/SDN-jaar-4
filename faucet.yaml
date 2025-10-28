@@ -56,77 +56,137 @@ dps:
         acl_in: isp_ingress_filter
 
 acls:
+
   guest_egress_policy:
+    # 1. Sta essentiële ICMPv6 ND door (anders werkt IPv6 in dit VLAN niet eens)
     - rule:
-        description: Allow IPv4 to ISP
+        description: allow icmpv6 nd (guest vlan)
+        dl_type: 0x86DD
+        ip_proto: 58            # ICMPv6
+        icmpv6_type: 133-136    # RS, RA, NS, NA
+        actions:
+          allow: 1
+
+    # 2. Blokkeer guest -> employees (IPv4)
+    - rule:
+        description: block guest -> employees (ipv4)
+        dl_type: 0x0800
+        ipv4_dst: 10.0.10.0/24
+        actions:
+          allow: 0
+
+    # 3. Blokkeer guest -> management (IPv4)
+    - rule:
+        description: block guest -> management (ipv4)
+        dl_type: 0x0800
+        ipv4_dst: 10.0.30.0/24
+        actions:
+          allow: 0
+
+    # 4. Blokkeer guest -> employees (IPv6)
+    - rule:
+        description: block guest -> employees (ipv6)
+        dl_type: 0x86DD
+        ipv6_dst: 2001:db8:10::/64
+        actions:
+          allow: 0
+
+    # 5. Blokkeer guest -> management (IPv6)
+    - rule:
+        description: block guest -> management (ipv6)
+        dl_type: 0x86DD
+        ipv6_dst: 2001:db8:30::/64
+        actions:
+          allow: 0
+
+    # 6. Sta verkeer naar ISP toe (IPv4)
+    - rule:
+        description: allow guest -> isp (ipv4)
         dl_type: 0x0800
         ipv4_dst: 203.0.113.0/28
         actions:
           allow: 1
+
+    # 7. Sta verkeer naar ISP toe (IPv6)
     - rule:
-        description: Allow IPv6 to ISP
+        description: allow guest -> isp (ipv6)
         dl_type: 0x86DD
         ipv6_dst: 2001:db8:40::/64
         actions:
           allow: 1
+
+    # 8. Drop alles wat niet hierboven matchte
     - rule:
-        description: Allow ICMPv6 ND (guest)
+        description: drop other guest traffic
+        actions:
+          allow: 0
+
+
+  isp_ingress_filter:
+    # 1. Sta ICMPv6 ND toe zodat basis neighbour discovery niet stuk gaat
+    - rule:
+        description: allow icmpv6 nd (isp vlan)
         dl_type: 0x86DD
         ip_proto: 58
         icmpv6_type: 133-136
         actions:
           allow: 1
+
+    # 2. Blokkeer ISP -> guest (IPv4)
     - rule:
-        description: Block all other traffic
+        description: block isp -> guest (ipv4)
+        dl_type: 0x0800
+        ipv4_src: 203.0.113.0/28
+        ipv4_dst: 10.0.20.0/24
         actions:
           allow: 0
 
-  isp_ingress_filter:
+    # 3. Blokkeer ISP -> guest (IPv6)
     - rule:
-        description: Block IPv4 from ISP to Guest
+        description: block isp -> guest (ipv6)
+        dl_type: 0x86DD
+        ipv6_src: 2001:db8:40::/64
+        ipv6_dst: 2001:db8:20::/64
+        actions:
+          allow: 0
+
+    # 4. Drop verder ongewenst verkeer richting guest-subnetten die we eventueel vergeten hebben (defensief)
+    - rule:
+        description: block isp -> guest catchall
         dl_type: 0x0800
         ipv4_dst: 10.0.20.0/24
         actions:
           allow: 0
+
     - rule:
-        description: Block IPv6 from ISP to Guest
+        description: block isp -> guest catchall v6
         dl_type: 0x86DD
         ipv6_dst: 2001:db8:20::/64
         actions:
           allow: 0
+
+    # 5. drop de rest
     - rule:
-        description: Allow ICMPv6 ND (ISP)
-        dl_type: 0x86DD
-        ip_proto: 58
-        icmpv6_type: 133-136
+        description: drop all other isp traffic
         actions:
-          allow: 1
+          allow: 0
+
+
+  mgmt_port_security:
+   
     - rule:
-        description: Allow all other traffic
+        description: allow known mgmt mac h3
+        dl_src: "00:00:00:00:00:03"
         actions:
           allow: 1
 
-  mgmt_port_security:
     - rule:
-        description: Allow management traffic from known VLANs (IPv4)
-        dl_type: 0x0800
-        ipv4_src: [10.0.10.0/24, 10.0.20.0/24, 203.0.113.0/28]
+        description: allow known mgmt mac h6
+        dl_src: "00:00:00:00:00:13"
         actions:
           allow: 1
+
     - rule:
-        description: Allow management traffic from known VLANs (IPv6)
-        dl_type: 0x86DD
-        ipv6_src: [2001:db8:10::/64, 2001:db8:20::/64, 2001:db8:40::/64]
-        actions:
-          allow: 1
-    - rule:
-        description: Allow ICMPv6 ND (Mgmt)
-        dl_type: 0x86DD
-        ip_proto: 58
-        icmpv6_type: 133-136
-        actions:
-          allow: 1
-    - rule:
-        description: Block all other traffic
+        description: drop other mgmt sources
         actions:
           allow: 0

@@ -81,6 +81,12 @@ def run():
         'h7': '2001:db8:40::14', 'h8': '2001:db8:40::14'
     }
 
+    for host in net.hosts:
+        host.cmd('sysctl -w net.ipv6.conf.all.disable_ipv6=0')
+        host.cmd('sysctl -w net.ipv6.conf.default.disable_ipv6=0')
+        host.cmd('sysctl -w net.ipv6.conf.lo.disable_ipv6=0')
+
+
     for host, ip6 in ipv6_config.items():
         net.get(host).cmd(f'ip -6 addr add {ip6} dev {host}-eth0')
         net.get(host).cmd(f'ip -6 route add default via {routes[host]}')
