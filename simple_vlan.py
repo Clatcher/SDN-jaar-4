@@ -4,12 +4,13 @@ from mininet.node import RemoteController
 from mininet.cli import CLI
 from mininet.log import setLogLevel
 from mininet.link import TCLink
+import time
 
 class SimpleVLANTopo(Topo):
     def build(self):
         # Switches
-        s1 = self.addSwitch('s1')  # Building A
-        s2 = self.addSwitch('s2')  # Building B
+        s1 = self.addSwitch('s1', dpid='0000000000000001') # Building A
+        s2 = self.addSwitch('s2', dpid='0000000000000002') # Building B
 
         # Hosts in Building A
         h1 = self.addHost('h1',
@@ -64,7 +65,12 @@ class SimpleVLANTopo(Topo):
 
 def run():
     topo = SimpleVLANTopo()
-    net = Mininet(topo=topo, controller=RemoteController, link=TCLink)
+    c0 = RemoteController('c0', ip='127.0.0.1', port=6653)
+    net = Mininet(topo=topo, controller=None, link=TCLink, autoSetMacs=True)
+    net.addController(c0)
+    print("Wachten tot Faucet gereed is...")
+    time.sleep(5)
+
     net.start()
 
     # Dual-stack IPv6 additions for all hosts
@@ -98,32 +104,32 @@ def run():
 
     def test_and_report():
         tests = [
-            ('h1', '10.0.10.12', 'Employee ↔ Employee (IPv4)'),
-            ('h4', '10.0.10.11', 'Employee ↔ Employee (IPv4)'),
-            ('h2', '203.0.113.2', 'Guest → ISP (IPv4)'),
-            ('h2', '203.0.113.3', 'Guest → ISP (IPv4)'),
-            ('h3', '10.0.10.11', 'Management → Employee (IPv4)'),
-            ('h3', '10.0.20.12', 'Management → Guest (IPv4)'),
-            ('h3', '203.0.113.2', 'Management → ISP (IPv4)'),
-            ('h5', '10.0.10.11', 'Guest → Employee (IPv4, moet mislukken)'),
-            ('h5', '10.0.30.11', 'Guest → Management (IPv4, moet mislukken)'),
-            ('h7', '10.0.20.11', 'ISP → Guest (IPv4, moet mislukken)'),
+            ('h1', '10.0.10.12', 'Employee  Employee (IPv4)'),
+            ('h4', '10.0.10.11', 'Employee  Employee (IPv4)'),
+            ('h2', '203.0.113.2', 'Guest  ISP (IPv4)'),
+            ('h2', '203.0.113.3', 'Guest  ISP (IPv4)'),
+            ('h3', '10.0.10.11', 'Management  Employee (IPv4)'),
+            ('h3', '10.0.20.12', 'Management  Guest (IPv4)'),
+            ('h3', '203.0.113.2', 'Management  ISP (IPv4)'),
+            ('h5', '10.0.10.11', 'Guest  Employee (IPv4, moet mislukken)'),
+            ('h5', '10.0.30.11', 'Guest  Management (IPv4, moet mislukken)'),
+            ('h7', '10.0.20.11', 'ISP  Guest (IPv4, moet mislukken)'),
         ]
         print("\n[TESTRESULTATEN - IPv4]")
         for src, dst, desc in tests:
             result = "geslaagd" if "0% packet loss" in net.get(src).cmd(f'ping -c1 -W1 {dst}') else "mislukt"
-            print(f"- {desc} ({src} → {dst}): {result}")
+            print(f"- {desc} ({src}  {dst}): {result}")
 
         tests6 = [
-            ('h1', '2001:db8:10::12', 'Employee ↔ Employee (IPv6)'),
-            ('h3', '2001:db8:40::2', 'Management → ISP (IPv6)'),
-            ('h2', '2001:db8:40::2', 'Guest → ISP (IPv6)'),
-            ('h7', '2001:db8:20::11', 'ISP → Guest (IPv6, moet mislukken)'),
+            ('h1', '2001:db8:10::12', 'Employee  Employee (IPv6)'),
+            ('h3', '2001:db8:40::2', 'Management  ISP (IPv6)'),
+            ('h2', '2001:db8:40::2', 'Guest  ISP (IPv6)'),
+            ('h7', '2001:db8:20::11', 'ISP  Guest (IPv6, moet mislukken)'),
         ]
         print("\n[TESTRESULTATEN - IPv6]")
         for src, dst, desc in tests6:
             result = "geslaagd" if "0% packet loss" in net.get(src).cmd(f'ping6 -c1 -W1 {dst}') else "mislukt"
-            print(f"- {desc} ({src} → {dst}): {result}")
+            print(f"- {desc} ({src}  {dst}): {result}")
 
     test_and_report()
 

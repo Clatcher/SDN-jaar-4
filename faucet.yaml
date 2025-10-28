@@ -1,5 +1,3 @@
-Version: 4
-
 vlans:
   10:
     name: employees
@@ -24,6 +22,7 @@ vlans:
 
 dps:
   s1:
+    dp_id: 0x1
     interfaces:
       1:
         native_vlan: 10
@@ -40,6 +39,7 @@ dps:
         acl_in: isp_ingress_filter
 
   s2:
+    dp_id: 0x2
     interfaces:
       1:
         native_vlan: 10
@@ -58,6 +58,13 @@ dps:
 acls:
 
   guest_egress_policy:
+
+    - rule:
+      description: allow ARP
+      eth_type: 0x0806
+      actions:
+        allow: 1
+
     # 1. Sta essentiële ICMPv6 ND door (anders werkt IPv6 in dit VLAN niet eens)
     - rule:
         description: allow icmpv6 nd (guest vlan)
@@ -123,6 +130,13 @@ acls:
 
 
   isp_ingress_filter:
+
+    - rule:
+      description: allow ARP
+      eth_type: 0x0806
+      actions:
+        allow: 1
+
     # 1. Sta ICMPv6 ND toe zodat basis neighbour discovery niet stuk gaat
     - rule:
         description: allow icmpv6 nd (isp vlan)
@@ -174,6 +188,12 @@ acls:
 
   mgmt_port_security:
    
+    - rule:
+      description: allow ARP
+      eth_type: 0x0806
+      actions:
+        allow: 1
+
     - rule:
         description: allow known mgmt mac h3
         dl_src: "00:00:00:00:00:03"
