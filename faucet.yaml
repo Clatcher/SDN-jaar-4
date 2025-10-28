@@ -1,90 +1,132 @@
-version: 2
-
-acls:
-  mgmt_port_security:
-    - rule:
-        description: "Allow only known management MAC"
-        dl_src: "00:00:00:00:00:03"
-        actions:
-          allow: 1
-    - rule:
-        description: "Drop unknown MACs"
-        actions:
-          allow: 0
-
-
+Version: 4
 
 vlans:
-  employees:
-    vid: 10
-    description: "Employees VLAN"
-    faucet_vips: ["10.0.10.1/24"]
-    routes:
-      - route:
-          ip_dst: "0.0.0.0/0"
-          ip_gw: "203.0.113.1"
-
-  guests:
-    vid: 20
-    description: "Guests VLAN"
-    faucet_vips: ["10.0.20.1/24"]
-    routes:
-      - route:
-          ip_dst: "0.0.0.0/0"
-          ip_gw: "203.0.113.1"
-
-  management:
-    vid: 30
-    description: "Management VLAN"
-    faucet_vips: ["10.0.30.1/24"]
-    acl_in: mgmt_port_security
-    routes:
-      - route:
-          ip_dst: "0.0.0.0/0"
-          ip_gw: "203.0.113.1"
-
-  isp:
-    vid: 99
-    description: "ISP VLAN"
-    faucet_vips: ["203.0.113.14/28"]
+  10:
+    name: employees
+    faucet_vips:
+      - "10.0.10.1/24"
+      - "2001:db8:10::1/64"
+  20:
+    name: guests
+    faucet_vips:
+      - "10.0.20.1/24"
+      - "2001:db8:20::1/64"
+  30:
+    name: management
+    faucet_vips:
+      - "10.0.30.1/24"
+      - "2001:db8:30::1/64"
+  99:
+    name: isp
+    faucet_vips:
+      - "203.0.113.14/28"
+      - "2001:db8:40::14/64"
 
 dps:
   s1:
-    dp_id: 0x1
-    hardware: "Open vSwitch"
     interfaces:
       1:
-        name: "A-employees_port"
-        native_vlan: employees
+        native_vlan: 10
       2:
-        name: "A-guests_port"
-        native_vlan: guests
+        native_vlan: 20
+        acl_in: guest_egress_policy
       3:
-        name: "A-management_port"
-        native_vlan: management
+        native_vlan: 30
+        acl_in: mgmt_port_security
       10:
-        name: "trunk_to_s2"
-        tagged_vlans: [employees, guests, management, isp]
+        tagged_vlans: [10, 20, 30, 99]
       20:
-        name: "A-ISP_port"
-        native_vlan: isp
+        native_vlan: 99
+        acl_in: isp_ingress_filter
 
   s2:
-    dp_id: 0x2
-    hardware: "Open vSwitch"
     interfaces:
       1:
-        name: "B-employees_port"
-        native_vlan: employees
+        native_vlan: 10
       2:
-        name: "B-guests_port"
-        native_vlan: guests
+        native_vlan: 20
+        acl_in: guest_egress_policy
       3:
-        name: "B-management_port"
-        native_vlan: management
+        native_vlan: 30
+        acl_in: mgmt_port_security
       10:
-        name: "trunk_to_s1"
-        tagged_vlans: [employees, guests, management, isp]
+        tagged_vlans: [10, 20, 30, 99]
       20:
-        name: "B-ISP_port"
-        native_vlan: isp
+        native_vlan: 99
+        acl_in: isp_ingress_filter
+
+acls:
+  guest_egress_policy:
+    - rule:
+        description: Allow IPv4 to ISP
+        dl_type: 0x0800
+        ipv4_dst: 203.0.113.0/28
+        actions:
+          allow: 1
+    - rule:
+        description: Allow IPv6 to ISP
+        dl_type: 0x86DD
+        ipv6_dst: 2001:db8:40::/64
+        actions:
+          allow: 1
+    - rule:
+        description: Allow ICMPv6 ND (guest)
+        dl_type: 0x86DD
+        ip_proto: 58
+        icmpv6_type: 133-136
+        actions:
+          allow: 1
+    - rule:
+        description: Block all other traffic
+        actions:
+          allow: 0
+
+  isp_ingress_filter:
+    - rule:
+        description: Block IPv4 from ISP to Guest
+        dl_type: 0x0800
+        ipv4_dst: 10.0.20.0/24
+        actions:
+          allow: 0
+    - rule:
+        description: Block IPv6 from ISP to Guest
+        dl_type: 0x86DD
+        ipv6_dst: 2001:db8:20::/64
+        actions:
+          allow: 0
+    - rule:
+        description: Allow ICMPv6 ND (ISP)
+        dl_type: 0x86DD
+        ip_proto: 58
+        icmpv6_type: 133-136
+        actions:
+          allow: 1
+    - rule:
+        description: Allow all other traffic
+        actions:
+          allow: 1
+
+  mgmt_port_security:
+    - rule:
+        description: Allow management traffic from known VLANs (IPv4)
+        dl_type: 0x0800
+        ipv4_src: [10.0.10.0/24, 10.0.20.0/24, 203.0.113.0/28]
+        actions:
+          allow: 1
+    - rule:
+        description: Allow management traffic from known VLANs (IPv6)
+        dl_type: 0x86DD
+        ipv6_src: [2001:db8:10::/64, 2001:db8:20::/64, 2001:db8:40::/64]
+        actions:
+          allow: 1
+    - rule:
+        description: Allow ICMPv6 ND (Mgmt)
+        dl_type: 0x86DD
+        ip_proto: 58
+        icmpv6_type: 133-136
+        actions:
+          allow: 1
+    - rule:
+        description: Block all other traffic
+        actions:
+          allow: 0
